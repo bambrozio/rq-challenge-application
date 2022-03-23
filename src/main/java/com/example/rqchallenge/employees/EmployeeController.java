@@ -8,16 +8,16 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-public interface IEmployeeController {
+public interface EmployeeController {
 
     @GetMapping()
-    ResponseEntity<List<Employee>> getAllEmployees() throws IOException;
+    ResponseEntity<List<EmployeeModel>> getAllEmployees() throws IOException;
 
     @GetMapping("/search/{searchString}")
-    ResponseEntity<List<Employee>> getEmployeesByNameSearch(@PathVariable String searchString);
+    ResponseEntity<List<EmployeeModel>> getEmployeesByNameSearch(@PathVariable String searchString);
 
     @GetMapping("/{id}")
-    ResponseEntity<Employee> getEmployeeById(@PathVariable String id);
+    ResponseEntity<EmployeeModel> getEmployeeById(@PathVariable String id);
 
     @GetMapping("/highestSalary")
     ResponseEntity<Integer> getHighestSalaryOfEmployees();
@@ -26,7 +26,7 @@ public interface IEmployeeController {
     ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames();
 
     @PostMapping()
-    ResponseEntity<Employee> createEmployee(@RequestBody Map<String, Object> employeeInput);
+    ResponseEntity<EmployeeModel> createEmployee(@RequestBody Map<String, Object> employeeInput);
 
     @DeleteMapping("/{id}")
     ResponseEntity<String> deleteEmployeeById(@PathVariable String id);
