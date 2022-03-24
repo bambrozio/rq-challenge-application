@@ -10,17 +10,13 @@ This repository contains my resolution to a code challenge I participated in. Th
     git clone git@github.com:bambrozio/rq-challenge-application.git
     cd rq-challenge-application
     ```
-2. Running the unit tests:
-    ```
-    ./gradlew bootRun
-    ```
-3. Starting the app:
+2. Start the app:
     ```
     ./gradlew bootRun
     ```
 
 ## Use it:
-### In another terminal, use the APIs:
+### In another terminal instance, use the APIs:
 
 1. Get all employees:
     ```
