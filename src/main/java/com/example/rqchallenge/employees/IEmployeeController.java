@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-//TODO: Use accepted headers for versioning instead (although for REST-API, URL versioning is fine).
 @RequestMapping("/api/v1")
 public interface IEmployeeController {
 
@@ -27,8 +26,14 @@ public interface IEmployeeController {
     @GetMapping("/employees/topTenHighestEarningEmployeeNames")
     ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames();
 
+    // Commented out because the challenge statement asks for a String and not a Employ object:
     @PostMapping("/employee")
     ResponseEntity<EmployeeModel> createEmployee(@RequestBody Map<String, Object> employeeInput);
+
+//    // As per challenge request:
+//    // output - string of the status (i.e. success) description - this should return a status of success or failed based on if an employee was created
+//    @PostMapping("/employee")
+//    ResponseEntity<String> createEmployee(@RequestBody Map<String, Object> employeeInput);
 
     @DeleteMapping("/employee/{id}")
     ResponseEntity<String> deleteEmployeeById(@PathVariable String id);

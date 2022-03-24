@@ -24,7 +24,8 @@ public class EmployeeService {
     private static final Logger logger = LoggerFactory.getLogger(EmployeeService.class);
 
     private static final String API_URL_BASE = "http://dummy.restapiexample.com/api/v1";
-    private static final String ERR_MSG = "API " + API_URL_BASE + "'%s' API currently unavailable. Try again in a few seconds. Returned error message: '%s'";
+    private static final String ERR_MSG = "API " + API_URL_BASE +
+            "'%s' with HTTP method '%s' currently unavailable. Try again in a few seconds. Returned error: '%s'";
 
     private final RestTemplate restTemplate;
 
@@ -34,50 +35,68 @@ public class EmployeeService {
     }
 
     public List<EmployeeModel> fetchEmployees() throws ServiceUnavailableException {
+
         String uri = "/employees";
         DummyApiModel<List<EmployeeModel>> dummy;
-
+        HttpMethod httpMethod = HttpMethod.GET;
         try {
-            dummy = restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<DummyApiModel<List<EmployeeModel>>>() {
+            dummy = restTemplate.exchange(uri, httpMethod, null,
+                    new ParameterizedTypeReference<DummyApiModel<List<EmployeeModel>>>() {
             }).getBody();
         } catch (Exception e) {
-            logger.error(String.format("URI=%s, errMsg=%s", uri, e.getMessage()), e);
-            throw new ServiceUnavailableException(String.format(ERR_MSG, uri, e.getMessage()));
+            logger.error(String.format("URI=%s, httpMethod=%s, errMsg=%s", uri, httpMethod, e.getMessage()), e);
+            throw new ServiceUnavailableException(String.format(ERR_MSG, uri, httpMethod, e.getMessage()));
         }
 
-        logger.debug("URI=%s, body=%s", uri, dummy);
-        return dummy == null ? null : dummy.getEmployees();
+        List<EmployeeModel> employees = dummy == null ? null : dummy.getEmployees();
+
+        logger.info("Service URI={}, httpMethod={} executed. Number of employees returned={}",
+                uri, httpMethod, employees == null ? 0 : employees.size());
+        logger.debug("URI={}, httpMethod={}, body={}", uri, httpMethod, dummy);
+        return employees;
     }
 
     public EmployeeModel fetchEmployee(int id) throws ServiceUnavailableException {
 
-        if (id < 1) throw new IllegalArgumentException("'id' must be greater than 0");
+        if (id < 1) {
+            throw new IllegalArgumentException("'id' must be greater than 0");
+        }
 
         String uri = "/employee/" + id;
         DummyApiModel<EmployeeModel> dummy;
+        HttpMethod httpMethod = HttpMethod.GET;
         try {
-            dummy = restTemplate.exchange(uri, HttpMethod.GET, null, new ParameterizedTypeReference<DummyApiModel<EmployeeModel>>() {
+            dummy = restTemplate.exchange(uri, httpMethod, null, new ParameterizedTypeReference<DummyApiModel<EmployeeModel>>() {
             }).getBody();
         } catch (Exception e) {
-            logger.error(String.format("URI=%s, errMsg=%s", uri, e.getMessage()), e);
-            throw new ServiceUnavailableException(String.format(ERR_MSG, uri, e.getMessage()));
+            logger.error(String.format("URI=%s, httpMethod=%s, errMsg=%s", uri, httpMethod, e.getMessage()), e);
+            throw new ServiceUnavailableException(String.format(ERR_MSG, uri, httpMethod, e.getMessage()));
         }
 
+        logger.info("Service URI={}, httpMethod={} executed", uri, httpMethod);
+        logger.debug("URI={}, httpMethod={}, body={}", uri, httpMethod, dummy);
         return dummy == null ? null : dummy.getEmployees();
     }
 
     public List<EmployeeModel> fetchEmployees(String name) throws ServiceUnavailableException {
         List<EmployeeModel> employees = fetchEmployees();
         employees.removeIf(s -> !s.getName().contains(name));
+
+        logger.info("Filtered names containing '{}'. Number of employees found={}",
+                name, employees == null ? 0 : employees.size());
+        logger.debug("Filtered string='{}'. Found employees={}", name, employees);
         return employees;
     }
 
-    public List<String> fetchTopTenHighestEarningEmployeeNames() throws ServiceUnavailableException {
+    public List<String> fetchTopNHighestEarningEmployeeNames(int n) throws ServiceUnavailableException {
         List<EmployeeModel> employees = fetchEmployees();
         Comparator<EmployeeModel> employeeSalaryComparator = Comparator.comparingDouble(EmployeeModel::getSalary).reversed();
         Collections.sort(employees, employeeSalaryComparator);
+        List<String> ret = employees.stream().limit(n).map(EmployeeModel::getName).collect(Collectors.toList());
 
-        return employees.stream().limit(10).map(EmployeeModel::getName).collect(Collectors.toList());
+        logger.info("Filtered top-{} salaries.", n);
+        logger.debug("Filtered top-{} salaries. Found employees={}", n, ret);
+        return ret;
     }
 
     public Integer fetchHighestSalaryOfEmployees() throws ServiceUnavailableException {
@@ -86,7 +105,11 @@ public class EmployeeService {
         EmployeeModel employeeWithHighestSalary = employees.stream().max(Comparator.comparingDouble(EmployeeModel::getSalary)).orElseThrow(NoSuchElementException::new);
 
         // Salary is usually double, but the challenge asks for int.
-        return (int) employeeWithHighestSalary.getSalary();
+        int ret = (int) employeeWithHighestSalary.getSalary();
+
+        logger.info("Filtered highest salary ***"); // sensitive information. Don't log in "info" level.
+        logger.debug("Highest salary={}", ret);
+        return ret;
     }
 
     public EmployeeModel create(EmployeeModel employee) throws ServiceUnavailableException {
@@ -99,38 +122,47 @@ public class EmployeeService {
 
         DummyApiModel<EmployeeModel> dummyCreated;
         String uri = "/create";
+        HttpMethod httpMethod = HttpMethod.POST;
         try {
-            dummyCreated = restTemplate.exchange(uri, HttpMethod.POST, null, new ParameterizedTypeReference<DummyApiModel<EmployeeModel>>() {
+            dummyCreated = restTemplate.exchange(uri, httpMethod, null, new ParameterizedTypeReference<DummyApiModel<EmployeeModel>>() {
             }).getBody();
         } catch (Exception e) {
-            logger.error(String.format("URI=%s, errMsg=%s", uri, e.getMessage()), e);
-            throw new ServiceUnavailableException(String.format(ERR_MSG, uri, e.getMessage()));
+            logger.error(String.format("URI=%s, httpMethod=%s, errMsg=%s", uri, httpMethod, e.getMessage()), e);
+            throw new ServiceUnavailableException(String.format(ERR_MSG, uri, httpMethod, e.getMessage()));
         }
 
         employee.setId(dummyCreated.getEmployees().getId());
 
+        logger.info("Service URI={}, httpMethod={} executed", uri, httpMethod);
+        logger.debug("URI={}, httpMethod={}, body={}, employee returned={}", uri, httpMethod, dummy, employee);
         return employee;
     }
 
     public EmployeeModel removeEmployee(int id) throws ServiceUnavailableException {
         EmployeeModel employee = fetchEmployee(id);
 
+        DummyApiModel<String> dummy = null;
+        String uri = "/delete/" + id;
+        HttpMethod httpMethod = HttpMethod.DELETE;
         if (employee != null) {
-            DummyApiModel<String> dummy;
-            String uri = "/delete/" + id;
             try {
-                dummy = restTemplate.exchange(uri, HttpMethod.DELETE, null, new ParameterizedTypeReference<DummyApiModel<String>>() {
+                dummy = restTemplate.exchange(uri, httpMethod, null,
+                        new ParameterizedTypeReference<DummyApiModel<String>>() {
                 }).getBody();
             } catch (Exception e) {
-                logger.error(String.format("URI=%s, errMsg=%s", uri, e.getMessage()), e);
-                throw new ServiceUnavailableException(String.format(ERR_MSG, uri, e.getMessage()));
+                logger.error(String.format("URI=%s, httpMethod=%s errMsg=%s", uri, httpMethod, e.getMessage()), e);
+                throw new ServiceUnavailableException(String.format(ERR_MSG, uri, httpMethod, e.getMessage()));
             }
 
             if (dummy == null || !dummy.getStatus().equalsIgnoreCase("success")) {
-                throw new IllegalStateException(String.format("{'status':'%s', 'message':'%s'}", dummy.getStatus(), dummy.getMessage()));
+                throw new IllegalStateException(
+                        String.format("{'status':'%s', 'message':'%s'}", dummy.getStatus(), dummy.getMessage()));
             }
         }
 
+        logger.info("Service URI={}, httpMethod={}, executed", uri, httpMethod);
+        logger.debug("URI={}, httpMethod={}, body={}, employee returned={}",
+                uri, httpMethod, dummy, employee);
         return employee;
     }
 }
