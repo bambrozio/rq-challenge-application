@@ -77,10 +77,10 @@ public class EmployeeController implements IEmployeeController {
 
     @Override
     public ResponseEntity createEmployee(Map<String, Object> employeeInput) {
-        EmployeeModel employee, createdEmployee;
+        EmployeeModel employee;
         try {
             employee = new EmployeeModel(employeeInput);
-            createdEmployee = employeeService.create(employee);
+            employee = employeeService.create(employee);
         } catch (IllegalArgumentException iae) {
             logger.warn(String.format("Invalid employeeInput=%s. Exception message=%s",
                     employeeInput, iae.getMessage()));
@@ -92,7 +92,7 @@ public class EmployeeController implements IEmployeeController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 String.format("{'status':'success','message':'Employ %s created! Assigned ID: %s'}",
-                        createdEmployee.getName(), createdEmployee.getId()));
+                        employee.getName(), employee.getId()));
     }
 
     @Override
