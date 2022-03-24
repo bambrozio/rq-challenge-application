@@ -1,6 +1,5 @@
 package com.example.rqchallenge.employees;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,7 +8,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EmployeeModel {
 
-    private static final String ERR_MSG = "key '%s' must be informed with a valid %s";
+    private static final String ERR_MSG = "Field '%s' must be informed with a valid %s";
 
     @JsonProperty("id")
     private int id;
@@ -25,17 +24,6 @@ public class EmployeeModel {
     public EmployeeModel() {
     }
 
-    @JsonCreator
-    public EmployeeModel(@JsonProperty("id") int id, @JsonProperty("employee_name") String name,
-                         @JsonProperty("employee_salary") double salary, @JsonProperty("employee_age") int age,
-                         @JsonProperty("profile_image") String image) {
-        this.id = id;
-        this.name = name;
-        this.salary = salary;
-        this.age = age;
-        this.image = image;
-    }
-
     public EmployeeModel(Map<String, Object> fields) {
 
         checkVals(fields);
@@ -46,7 +34,9 @@ public class EmployeeModel {
         this.image = (String) fields.getOrDefault("profile_image", "");
     }
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -60,7 +50,9 @@ public class EmployeeModel {
         this.name = name;
     }
 
-    public double getSalary() { return salary; }
+    public double getSalary() {
+        return salary;
+    }
 
     public void setSalary(double salary) {
         this.salary = salary;
@@ -82,10 +74,11 @@ public class EmployeeModel {
         this.image = image;
     }
 
+    // TODO: better to Spring Validation (MapBindingResult) instead.
     private void checkVals(Map<String, Object> fields) {
-        // TODO: refactor to use a custom Spring Validation (MapBindingResult) instead.
 
-        if (!fields.containsKey("employee_name") || String.valueOf(fields.get("employee_name")).isEmpty() || String.valueOf(fields.get("employee_name")).isBlank()) {
+        if (!fields.containsKey("employee_name") || String.valueOf(fields.get("employee_name")).isEmpty()
+                || String.valueOf(fields.get("employee_name")).isBlank()) {
             throw new IllegalArgumentException(String.format(ERR_MSG, "employee_name", "name"));
         }
 
@@ -100,5 +93,16 @@ public class EmployeeModel {
         } catch (Exception e) {
             throw new IllegalArgumentException(String.format(ERR_MSG, "employee_age", "positive numeric value"));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "EmployeeModel{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", salary=" + salary +
+                ", age=" + age +
+                ", image='" + image + '\'' +
+                '}';
     }
 }
