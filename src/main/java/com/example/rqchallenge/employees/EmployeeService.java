@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.naming.ServiceUnavailableException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,7 +77,7 @@ public class EmployeeService {
 
     public List<EmployeeModel> fetchEmployees(String name) throws ServiceUnavailableException {
         List<EmployeeModel> employees = fetchEmployees();
-        employees.removeIf(s -> !s.getName().contains(name));
+        employees.removeIf(s -> !s.getName().toLowerCase().contains(name.toLowerCase()));
 
         logger.info("Filtered names containing '{}'. Number of employees found={}",
                 name, employees == null ? 0 : employees.size());

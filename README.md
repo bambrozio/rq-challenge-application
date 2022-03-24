@@ -1,38 +1,52 @@
-# Coding Challenge 
+# Coding Challenge
+> Original instructions moved to [README2.md](./README2.md)
 
-### In this assessment you will be tasked with filling out the functionality of different methods that will be listed further down. 
-These methods will require some level of api interactions with the following base url: https://dummy.restapiexample.com.
-Please keep the following in mind when doing this assessment: clean coding practices, test driven development, logging, and scalability.
-If you are unable to successfully receive responses from the endpoints, mocking the response calls may prove to be helpful.
+This repository contains my resolution to a code challenge I participated in. The instructions on what has been asked can be found at [README2.md](./README2.md). In addition, below, I document how to start and use this application through the command line.
 
-Endpoints to implement
+## Start it:
 
-getAllEmployees()
-output - list of employees
-description - this should return all employees
+1. Clone the repository:
+    ```
+    git clone git@github.com:bambrozio/rq-challenge-application.git
+    cd rq-challenge-application
+    ```
+2. Running the unit tests:
+    ```
+    ./gradlew bootRun
+    ```
+3. Starting the app:
+    ```
+    ./gradlew bootRun
+    ```
 
-getEmployeesByNameSearch()
-output - list of employees
-description - this should return all employees whose name contains or matches the string input provided
+## Use it:
+### In another terminal, use the APIs:
 
-getEmployeeById(string id)
-output - employee
-description - this should return a single employee
-
-getHighestSalaryOfEmployees()
-output - integer of the highest salary
-description -  this should return a single integer indicating the highest salary of all employees
-
-getTop10HighestEarningEmployeeNames()
-output - list of employees
-description -  this should return a list of the top 10 employees based off of their salaries
-
-createEmployee(string name, string salary, string age)
-output - string of the status (i.e. success)
-description -  this should return a status of success or failed based on if an employee was created
-
-
-
-deleteEmployee(String id)
-output - the name of the employee that was deleted
-description - this should delete the employee with specified id given
+1. Get all employees:
+    ```
+    curl http://localhost:8080/api/v1/employees
+    ```
+2. Get employees whose names contain a given string. For example: `jen`:
+    ```
+    curl http://localhost:8080/api/v1/employees/search/jen
+    ```
+3. Get employee by the given ID. For example: `2`:
+    ```
+    curl http://localhost:8080/api/v1/employee/2
+    ```
+4. Get the highest salary among the employees:
+    ```
+    curl http://localhost:8080/api/v1/employee/highestSalary
+    ```
+5. Get the top-10 employee names based on their salaries:
+    ```
+    curl http://localhost:8080/api/v1/employees/topTenHighestEarningEmployeeNames
+    ```
+6. Create a new employee:
+    ```
+    curl -H "Content-Type: application/json" -X POST -d '{"employee_name": "Bruno Ambrozio", "employee_age": 35, "employee_salary": 10000}' http://localhost:8080/api/v1/employee
+    ```
+7. Delete an employee:
+    ```
+    curl -X DELETE http://localhost:8080/api/v1/employee/2
+    ```
