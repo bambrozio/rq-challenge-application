@@ -1,34 +1,53 @@
 package com.example.rqchallenge.employees;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-public interface EmployeeController {
+public class EmployeeController implements IEmployeeController {
 
-    @GetMapping()
-    ResponseEntity<List<EmployeeModel>> getAllEmployees() throws IOException;
+    @Autowired
+    private EmployeeService employeeService;
 
-    @GetMapping("/search/{searchString}")
-    ResponseEntity<List<EmployeeModel>> getEmployeesByNameSearch(@PathVariable String searchString);
+    @Override
+    public ResponseEntity<List<EmployeeModel>> getAllEmployees() throws IOException {
+        List<EmployeeModel> employees = employeeService.fetchEmployees();
+        return employees == null || employees.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(employees);
+    }
 
-    @GetMapping("/{id}")
-    ResponseEntity<EmployeeModel> getEmployeeById(@PathVariable String id);
+    @Override
+    public ResponseEntity<List<EmployeeModel>> getEmployeesByNameSearch(String searchString) {
+        return null;
+    }
 
-    @GetMapping("/highestSalary")
-    ResponseEntity<Integer> getHighestSalaryOfEmployees();
+    @Override
+    public ResponseEntity<EmployeeModel> getEmployeeById(String id) {
+        EmployeeModel employee = employeeService.fetchEmployee(id);
+        return employee == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(employee);
+    }
 
-    @GetMapping("/topTenHighestEarningEmployeeNames")
-    ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames();
+    @Override
+    public ResponseEntity<Integer> getHighestSalaryOfEmployees() {
+        return null;
+    }
 
-    @PostMapping()
-    ResponseEntity<EmployeeModel> createEmployee(@RequestBody Map<String, Object> employeeInput);
+    @Override
+    public ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames() {
+        return null;
+    }
 
-    @DeleteMapping("/{id}")
-    ResponseEntity<String> deleteEmployeeById(@PathVariable String id);
+    @Override
+    public ResponseEntity<EmployeeModel> createEmployee(Map<String, Object> employeeInput) {
+        return null;
+    }
 
+    @Override
+    public ResponseEntity<String> deleteEmployeeById(String id) {
+        return null;
+    }
 }
