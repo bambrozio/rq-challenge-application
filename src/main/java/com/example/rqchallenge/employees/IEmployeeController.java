@@ -8,26 +8,28 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+//TODO: Use accepted headers for versioning instead (although for REST-API, URL versioning is fine).
+@RequestMapping("/api/v1")
 public interface IEmployeeController {
 
-    @GetMapping()
+    @GetMapping("/employees")
     ResponseEntity<List<EmployeeModel>> getAllEmployees() throws IOException;
 
-    @GetMapping("/search/{searchString}")
+    @GetMapping("/employees/search/{searchString}")
     ResponseEntity<List<EmployeeModel>> getEmployeesByNameSearch(@PathVariable String searchString);
 
-    @GetMapping("/{id}")
+    @GetMapping("/employee/{id}")
     ResponseEntity<EmployeeModel> getEmployeeById(@PathVariable String id);
 
-    @GetMapping("/highestSalary")
+    @GetMapping("/employee/highestSalary")
     ResponseEntity<Integer> getHighestSalaryOfEmployees();
 
-    @GetMapping("/topTenHighestEarningEmployeeNames")
+    @GetMapping("/employees/topTenHighestEarningEmployeeNames")
     ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames();
 
-    @PostMapping()
+    @PostMapping("/employee")
     ResponseEntity<EmployeeModel> createEmployee(@RequestBody Map<String, Object> employeeInput);
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/employee/{id}")
     ResponseEntity<String> deleteEmployeeById(@PathVariable String id);
 }
