@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.naming.ServiceUnavailableException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +34,12 @@ public class EmployeeService {
         logger.info("REST Client built.");
     }
 
+    /**
+     * Fetches all employees.
+     *
+     * @return A list with the found {@link EmployeeModel}. Null otherwise.
+     * @throws ServiceUnavailableException When {@value #API_URL_BASE} is unavailable.
+     */
     public List<EmployeeModel> fetchEmployees() throws ServiceUnavailableException {
 
         String uri = "/employees";
@@ -53,6 +62,13 @@ public class EmployeeService {
         return employees;
     }
 
+    /**
+     * Fetches employee by the given ID.
+     *
+     * @param id The ID to be searched for.
+     * @return The found {@link EmployeeModel}. Null otherwise.
+     * @throws ServiceUnavailableException When {@value #API_URL_BASE} is unavailable.
+     */
     public EmployeeModel fetchEmployee(int id) throws ServiceUnavailableException {
 
         if (id < 1) {
@@ -75,6 +91,13 @@ public class EmployeeService {
         return dummy == null ? null : dummy.getEmployees();
     }
 
+    /**
+     * Fetches employees whose names contain the given string.
+     *
+     * @param name The given string to be used on the search filter.
+     * @return A list with the found {@link EmployeeModel}.
+     * @throws ServiceUnavailableException When {@value #API_URL_BASE} is unavailable.
+     */
     public List<EmployeeModel> fetchEmployees(String name) throws ServiceUnavailableException {
         List<EmployeeModel> employees = fetchEmployees();
         employees.removeIf(s -> !s.getName().toLowerCase().contains(name.toLowerCase()));
@@ -85,6 +108,13 @@ public class EmployeeService {
         return employees;
     }
 
+    /**
+     * Fetches the top-N employee names based on their salaries.
+     *
+     * @param n the amount of employees to be returned, based on their salaries.
+     * @return A list of Strings with the found employees names.
+     * @throws ServiceUnavailableException When {@value #API_URL_BASE} is unavailable.
+     */
     public List<String> fetchTopNHighestEarningEmployeeNames(int n) throws ServiceUnavailableException {
         List<EmployeeModel> employees = fetchEmployees();
         Comparator<EmployeeModel> employeeSalaryComparator = Comparator.comparingDouble(EmployeeModel::getSalary).reversed();
@@ -96,6 +126,12 @@ public class EmployeeService {
         return ret;
     }
 
+    /**
+     * Fetches the highest salary among the employees.
+     *
+     * @return An Integer with the higher salary found.
+     * @throws ServiceUnavailableException When {@value #API_URL_BASE} is unavailable.
+     */
     public Integer fetchHighestSalaryOfEmployees() throws ServiceUnavailableException {
         List<EmployeeModel> employees = fetchEmployees();
 
@@ -109,6 +145,13 @@ public class EmployeeService {
         return ret;
     }
 
+    /**
+     * Creates a new employee.
+     *
+     * @param employee The given {@link EmployeeModel} to be created.
+     * @return The created {@link EmployeeModel}, including its new ID.
+     * @throws ServiceUnavailableException When {@value #API_URL_BASE} is unavailable.
+     */
     public EmployeeModel create(EmployeeModel employee) throws ServiceUnavailableException {
 
         HttpHeaders headers = new HttpHeaders();
@@ -135,6 +178,13 @@ public class EmployeeService {
         return employee;
     }
 
+    /**
+     * Removes an employee.
+     *
+     * @param id The ID of the employee to be deleted.
+     * @return The {@link EmployeeModel} just removed.
+     * @throws ServiceUnavailableException When {@value #API_URL_BASE} is unavailable.
+     */
     public EmployeeModel removeEmployee(int id) throws ServiceUnavailableException {
         EmployeeModel employee = fetchEmployee(id);
 
