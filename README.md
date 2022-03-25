@@ -46,3 +46,40 @@ This repository contains my resolution to a code challenge I participated in. Th
     ```
     curl -X DELETE http://localhost:8080/api/v1/employee/2
     ```
+
+
+### Outputs
+#### Raw execution with outputs for reference purposes:
+
+```
+curl http://localhost:8080/api/v1/employees
+[{"id":1,"employee_name":"Tiger Nixon","employee_salary":320800.0,"employee_age":61,"profile_image":""},{"id":2,"employee_name":"Garrett Winters","employee_salary":170750.0,"employee_age":63,"profile_image":""},...] 
+
+curl http://localhost:8080/api/v1/employees/search/jen
+[{"id":11,"employee_name":"Jena Gaines","employee_salary":90560.0,"employee_age":30,"profile_image":""},{"id":21,"employee_name":"Jenette Caldwell","employee_salary":345000.0,"employee_age":30,"profile_image":""}]
+
+curl http://localhost:8080/api/v1/employee/2
+{"id":2,"employee_name":"Garrett Winters","employee_salary":170750.0,"employee_age":63,"profile_image":""}     
+
+curl http://localhost:8080/api/v1/employee/highestSalary
+API http://dummy.restapiexample.com/api/v1'/employees' with HTTP method 'GET' currently unavailable. Try again in a few seconds. Returned error: '429 Too Many Requests: "{<LF>    "message": "Too Many Attempts."<LF>}"'%   
+
+curl http://localhost:8080/api/v1/employee/highestSalary
+725000   
+
+curl http://localhost:8080/api/v1/employees/topTenHighestEarningEmployeeNames
+["Paul Byrd","Yuri Berry","Charde Marshall","Cedric Kelly","Tatyana Fitzpatrick","Brielle Williamson","Jenette Caldwell","Quinn Flynn","Rhona Davidson","Tiger Nixon"]     
+
+curl -H "Content-Type: application/json" -X POST -d '{"employee_name": "Bruno Ambrozio", "employee_age": 35, "employee_salary": 10000}' http://localhost:8080/api/v1/employee
+{'status':'success','message':'Employ Bruno Ambrozio created! Assigned ID: 4852'}
+
+curl -X DELETE http://localhost:8080/api/v1/employee/2
+Employee 'Garrett Winters' delete
+```
+
+**Note:** Sometimes, the Dummy API is flooded with too many requests. When this is the case, you will experience the following return:
+```
+curl http://localhost:8080/api/v1/employees/topTenHighestEarningEmployeeNames
+API http://dummy.restapiexample.com/api/v1'/employees' with HTTP method 'GET' currently unavailable. Try again in a few seconds. Returned error: '429 Too Many Requests: "{<LF>    "message": "Too Many Attempts."<LF>}"'%   
+```
+Therefore, as per returned message, try again in a few seconds.
