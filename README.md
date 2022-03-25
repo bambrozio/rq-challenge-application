@@ -7,7 +7,7 @@ This repository contains my resolution to a code challenge I participated in. Th
 
 1. Clone the repository:
     ```
-    git clone git@github.com:bambrozio/rq-challenge-application.git
+    git clone https://github.com/bambrozio/rq-challenge-application.git
     cd rq-challenge-application
     ```
 2. Start the app:
