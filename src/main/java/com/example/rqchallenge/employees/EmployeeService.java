@@ -1,5 +1,7 @@
 package com.example.rqchallenge.employees;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -28,6 +30,7 @@ public class EmployeeService {
             "'%s' with HTTP method '%s' currently unavailable. Try again in a few seconds. Returned error: '%s'";
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public EmployeeService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.rootUri(API_URL_BASE).build();
@@ -79,8 +82,8 @@ public class EmployeeService {
         DummyApiModel<EmployeeModel> dummy;
         HttpMethod httpMethod = HttpMethod.GET;
         try {
-            dummy = restTemplate.exchange(uri, httpMethod, null, new ParameterizedTypeReference<DummyApiModel<EmployeeModel>>() {
-            }).getBody();
+            dummy = restTemplate.exchange(uri, httpMethod, null,
+                    new ParameterizedTypeReference<DummyApiModel<EmployeeModel>>() {}).getBody();
         } catch (Exception e) {
             logger.error(String.format("URI=%s, httpMethod=%s, errMsg=%s", uri, httpMethod, e.getMessage()), e);
             throw new ServiceUnavailableException(String.format(ERR_MSG, uri, httpMethod, e.getMessage()));
@@ -117,7 +120,8 @@ public class EmployeeService {
      */
     public List<String> fetchTopNHighestEarningEmployeeNames(int n) throws ServiceUnavailableException {
         List<EmployeeModel> employees = fetchEmployees();
-        Comparator<EmployeeModel> employeeSalaryComparator = Comparator.comparingDouble(EmployeeModel::getSalary).reversed();
+        Comparator<EmployeeModel> employeeSalaryComparator =
+                Comparator.comparingDouble(EmployeeModel::getSalary).reversed();
         Collections.sort(employees, employeeSalaryComparator);
         List<String> ret = employees.stream().limit(n).map(EmployeeModel::getName).collect(Collectors.toList());
 
@@ -135,12 +139,14 @@ public class EmployeeService {
     public Integer fetchHighestSalaryOfEmployees() throws ServiceUnavailableException {
         List<EmployeeModel> employees = fetchEmployees();
 
-        EmployeeModel employeeWithHighestSalary = employees.stream().max(Comparator.comparingDouble(EmployeeModel::getSalary)).orElseThrow(NoSuchElementException::new);
+        EmployeeModel employeeWithHighestSalary =
+                employees.stream().max(Comparator.comparingDouble(EmployeeModel::getSalary))
+                        .orElseThrow(NoSuchElementException::new);
 
-        // Salary is usually double, but the challenge asks for int.
+        // Salary is usually double, but the challenge asks for int, so casting it.
         int ret = (int) employeeWithHighestSalary.getSalary();
 
-        logger.info("Filtered highest salary ***"); // sensitive information. Don't log in "info" level.
+        logger.info("Filtered highest salary ***"); // sensitive information. Don't log in "INFO" level.
         logger.debug("Highest salary={}", ret);
         return ret;
     }
@@ -156,25 +162,28 @@ public class EmployeeService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        DummyApiModel<EmployeeModel> dummy = new DummyApiModel<>(null, employee, null);
-        HttpEntity<DummyApiModel> httpEntity = new HttpEntity<>(dummy, headers);
-
-        DummyApiModel<EmployeeModel> dummyCreated;
         String uri = "/create";
+        DummyApiModel<EmployeeModel> dummyCreated = null;
+        String reqBody = null;
         HttpMethod httpMethod = HttpMethod.POST;
         try {
-            dummyCreated = restTemplate.exchange(uri, httpMethod, null, new ParameterizedTypeReference<DummyApiModel<EmployeeModel>>() {
-            }).getBody();
+            reqBody = objectMapper.writeValueAsString(employee);
+            HttpEntity<String> request = new HttpEntity<String>(reqBody, headers);
+            dummyCreated = restTemplate.exchange(uri, httpMethod, request,
+                    new ParameterizedTypeReference<DummyApiModel<EmployeeModel>>() {}).getBody();
+        } catch (JsonProcessingException jpe) {
+            logger.error("Fail to serialize given EmployeeModel into JSON", jpe);
         } catch (Exception e) {
-            logger.error(String.format("URI=%s, httpMethod=%s, errMsg=%s", uri, httpMethod, e.getMessage()), e);
+            logger.error(String.format("URI=%s, httpMethod=%s, reqBody=%s, errMsg=%s",
+                    uri, httpMethod, reqBody, e.getMessage()), e);
             throw new ServiceUnavailableException(String.format(ERR_MSG, uri, httpMethod, e.getMessage()));
         }
 
         employee.setId(dummyCreated.getEmployees().getId());
 
-        logger.info("Service URI={}, httpMethod={} executed", uri, httpMethod);
-        logger.debug("URI={}, httpMethod={}, body={}, employee returned={}", uri, httpMethod, dummy, employee);
+        logger.info("Service URI={}, httpMethod={} executed. Employee '{}' created. Given ID '{}'",
+                uri, httpMethod, employee.getName(), employee.getId());
+        logger.debug("URI={}, httpMethod={}, body={}, employee Response returned={}={}", uri, httpMethod, dummyCreated);
         return employee;
     }
 

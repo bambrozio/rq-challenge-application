@@ -15,7 +15,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -34,9 +36,12 @@ class EmployeeControllerTest {
     private static EmployeeModel employee;
     private final static List<EmployeeModel> employees = new ArrayList<>();
     private static List<String> employeeNames;
+    private static ObjectMapper objectMapper;
 
     @BeforeAll
     static void setUp() {
+        objectMapper = new ObjectMapper();
+
         employeeInput = new HashMap<>();
         employeeInput.put("id", 2);
         employeeInput.put("employee_name", "Garrett Winters");
@@ -109,18 +114,15 @@ class EmployeeControllerTest {
     }
 
     @Test
-    //TODO: Remove comments and fix-me.
     void createEmployee() throws Exception {
-        when(service.create(employee)).thenReturn(employee);
-        ObjectMapper objectMapper = new ObjectMapper();
+
+        when(service.create(any())).thenReturn(employee);
         String body = objectMapper.writeValueAsString(employeeInput);
-        this.mockMvc.perform(post("/api/v1/employee")
-//                        .contentType(APPLICATION_JSON)
-                        .content(body))
-                .andDo(print())
-//                .andExpect(status().isCreated());
-                .andExpect(status().isUnsupportedMediaType());
-//                .andExpect(content().string(containsString("success")));
+        mockMvc.perform(post("/api/v1/employee")
+                        .contentType(APPLICATION_JSON)
+                        .content(body).accept(APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(containsString("success")));
     }
 
     @Test
